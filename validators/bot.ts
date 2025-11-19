@@ -7,13 +7,8 @@ export const botCreateSchema = z.object({
     .string()
     .min(10, "System prompt must be at least 10 characters")
     .max(2000, "System prompt too long"),
-  model: z.enum([
-    "anthropic/claude-3.5-sonnet",
-    "anthropic/claude-3-haiku",
-    "openai/gpt-4-turbo",
-    "openai/gpt-3.5-turbo",
-    "google/gemini-pro",
-  ]),
+  model: z.string().min(1, "Model is required"),
+  provider: z.enum(["openrouter", "agentrouter"]).default("openrouter"),
   temperature: z.number().min(0).max(2).default(0.7),
   max_tokens: z.number().min(100).max(4000).default(1000),
 });

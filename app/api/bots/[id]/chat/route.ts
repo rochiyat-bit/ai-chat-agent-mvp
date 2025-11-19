@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { streamChatCompletion } from "@/lib/ai/openrouter";
+import { streamChatCompletionAgentRouter } from "@/lib/ai/agentrouter";
 import { retrieveRelevantContext, buildPromptWithContext } from "@/lib/ai/rag";
 import { Bot, Conversation, Message } from "@/models";
 import { chatMessageSchema } from "@/validators/chat";
@@ -66,13 +67,20 @@ export async function POST(
       conversationHistory
     );
 
-    // Stream response
-    const stream = await streamChatCompletion(
-      messages,
-      bot.model,
-      bot.temperature,
-      bot.max_tokens
-    );
+    // Stream response based on provider
+    const stream = bot.provider === "agentrouter"
+      ? await streamChatCompletionAgentRouter(
+          messages,
+          bot.model,
+          bot.temperature,
+          bot.max_tokens
+        )
+      : await streamChatCompletion(
+          messages,
+          bot.model,
+          bot.temperature,
+          bot.max_tokens
+        );
 
     // Create SSE stream
     const encoder = new TextEncoder();

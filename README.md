@@ -81,6 +81,7 @@ NEXTAUTH_SECRET=your-secret-key-here
 # AI Providers
 OPENROUTER_API_KEY=sk-or-v1-xxxxx
 OPENAI_API_KEY=sk-xxxxx
+AGENT_ROUTER_TOKEN=your-agent-router-token-here
 
 # File Upload (optional)
 UPLOADTHING_SECRET=sk_live_xxxxx
@@ -222,13 +223,25 @@ vercel --prod
 
 ## 🔧 Configuration
 
-### Supported AI Models
+### Supported AI Providers
 
+**OpenRouter** (Multi-provider access)
 - `anthropic/claude-3.5-sonnet` (default)
 - `anthropic/claude-3-haiku`
 - `openai/gpt-4-turbo`
 - `openai/gpt-3.5-turbo`
 - `google/gemini-pro`
+- `meta-llama/llama-3.1-70b-instruct`
+
+**Agent Router** (https://agentrouter.org)
+- `gpt-4o`
+- `gpt-4o-mini`
+- `claude-3-5-sonnet-20241022`
+- `claude-3-5-haiku-20241022`
+- `gemini-2.0-flash-exp`
+- `gemini-1.5-pro`
+- `llama-3.3-70b-versatile`
+- And more models...
 
 ### Model Parameters
 
