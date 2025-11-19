@@ -1,6 +1,7 @@
 import NextAuth from "next-auth";
 import Credentials from "next-auth/providers/credentials";
 import bcrypt from "bcryptjs";
+import { User, Organization } from "@/models";
 
 export const { handlers, auth, signIn, signOut } = NextAuth({
   providers: [
@@ -16,9 +17,6 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
         }
 
         try {
-          // Dynamic import to avoid Edge Runtime issues in middleware
-          const { User, Organization } = await import("@/models");
-
           const user = await User.findOne({
             where: { email: credentials.email as string },
             include: [{ model: Organization, as: "organization" }],
