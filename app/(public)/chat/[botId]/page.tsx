@@ -1,9 +1,8 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
+import { use, useState, useEffect, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { Card } from "@/components/ui/card";
 import { Send, Loader2 } from "lucide-react";
 
@@ -12,7 +11,8 @@ interface Message {
   content: string;
 }
 
-export default function ChatPage({ params }: { params: { botId: string } }) {
+export default function ChatPage({ params }: { params: Promise<{ botId: string }> }) {
+  const { botId } = use(params);
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
@@ -38,7 +38,7 @@ export default function ChatPage({ params }: { params: { botId: string } }) {
     setLoading(true);
 
     try {
-      const response = await fetch(`/api/bots/${params.botId}/chat`, {
+      const response = await fetch(`/api/bots/${botId}/chat`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
