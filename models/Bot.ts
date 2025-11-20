@@ -8,6 +8,7 @@ export interface BotAttributes {
   description: string | null;
   system_prompt: string;
   model: string;
+  provider: "openrouter" | "agentrouter";
   temperature: number;
   max_tokens: number;
   is_active: boolean;
@@ -42,6 +43,7 @@ class Bot extends Model<BotAttributes, BotCreationAttributes> implements BotAttr
   declare description: string | null;
   declare system_prompt: string;
   declare model: string;
+  declare provider: "openrouter" | "agentrouter";
   declare temperature: number;
   declare max_tokens: number;
   declare is_active: boolean;
@@ -85,6 +87,11 @@ Bot.init(
       type: DataTypes.STRING(100),
       allowNull: false,
       defaultValue: "anthropic/claude-3.5-sonnet",
+    },
+    provider: {
+      type: DataTypes.ENUM("openrouter", "agentrouter"),
+      allowNull: false,
+      defaultValue: "openrouter",
     },
     temperature: {
       type: DataTypes.FLOAT,

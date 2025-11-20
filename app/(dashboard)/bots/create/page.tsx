@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -12,14 +12,41 @@ export default function CreateBotPage() {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  const [availableModels, setAvailableModels] = useState<string[]>([]);
+  const [loadingModels, setLoadingModels] = useState(false);
   const [formData, setFormData] = useState({
     name: "",
     description: "",
     system_prompt: "You are a helpful AI assistant. Answer questions professionally and try to capture lead information when appropriate.",
+    provider: "openrouter" as "openrouter" | "agentrouter",
     model: "anthropic/claude-3.5-sonnet",
     temperature: 0.7,
     max_tokens: 1000,
   });
+
+  // Load models when provider changes
+  useEffect(() => {
+    fetchModels(formData.provider);
+  }, [formData.provider]);
+
+  const fetchModels = async (provider: string) => {
+    setLoadingModels(true);
+    try {
+      const response = await fetch(`/api/providers/models?provider=${provider}`);
+      if (response.ok) {
+        const data = await response.json();
+        setAvailableModels(data.models);
+        // Set first model as default
+        if (data.models.length > 0) {
+          setFormData((prev) => ({ ...prev, model: data.models[0] }));
+        }
+      }
+    } catch (error) {
+      console.error("Error fetching models:", error);
+    } finally {
+      setLoadingModels(false);
+    }
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -113,9 +140,32 @@ export default function CreateBotPage() {
                 </p>
               </div>
 
+              <div className="space-y-2">
+                <Label htmlFor="provider">AI Provider *</Label>
+                <select
+                  id="provider"
+                  className="w-full h-10 rounded-md border border-input bg-background px-3 py-2 text-sm"
+                  value={formData.provider}
+                  onChange={(e) =>
+                    setFormData({
+                      ...formData,
+                      provider: e.target.value as "openrouter" | "agentrouter",
+                    })
+                  }
+                >
+                  <option value="openrouter">OpenRouter (Claude, GPT, Gemini)</option>
+                  <option value="agentrouter">Agent Router (Multi-model)</option>
+                </select>
+                <p className="text-xs text-muted-foreground">
+                  {formData.provider === "openrouter"
+                    ? "Access multiple AI models through OpenRouter"
+                    : "Access AI models through Agent Router"}
+                </p>
+              </div>
+
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <Label htmlFor="model">AI Model</Label>
+                  <Label htmlFor="model">AI Model *</Label>
                   <select
                     id="model"
                     className="w-full h-10 rounded-md border border-input bg-background px-3 py-2 text-sm"
@@ -123,17 +173,23 @@ export default function CreateBotPage() {
                     onChange={(e) =>
                       setFormData({ ...formData, model: e.target.value })
                     }
+                    disabled={loadingModels}
                   >
-                    <option value="anthropic/claude-3.5-sonnet">
-                      Claude 3.5 Sonnet
-                    </option>
-                    <option value="anthropic/claude-3-haiku">
-                      Claude 3 Haiku
-                    </option>
-                    <option value="openai/gpt-4-turbo">GPT-4 Turbo</option>
-                    <option value="openai/gpt-3.5-turbo">GPT-3.5 Turbo</option>
-                    <option value="google/gemini-pro">Gemini Pro</option>
+                    {loadingModels ? (
+                      <option>Loading models...</option>
+                    ) : (
+                      availableModels.map((model) => (
+                        <option key={model} value={model}>
+                          {model}
+                        </option>
+                      ))
+                    )}
                   </select>
+                  <p className="text-xs text-muted-foreground">
+                    {formData.provider === "agentrouter"
+                      ? "Models provided by Agent Router"
+                      : "Models from various providers"}
+                  </p>
                 </div>
 
                 <div className="space-y-2">
@@ -170,7 +226,7 @@ export default function CreateBotPage() {
                 >
                   Cancel
                 </Button>
-                <Button type="submit" disabled={loading}>
+                <Button type="submit" disabled={loading || loadingModels}>
                   {loading ? "Creating..." : "Create Bot"}
                 </Button>
               </div>
